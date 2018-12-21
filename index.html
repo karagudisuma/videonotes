@@ -1,0 +1,31 @@
+<html>
+<!-- Main Quill library -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<!-- internal scripts -->
+<script type="text/javascript" src="views/edit-notes.js"></script>
+
+<!-- css sheets -->
+<link  rel="stylesheet" type="text/css" href="style.css" />
+
+<body>
+  <form>
+    <input type="text" id="input-video-url">
+    <button type="submit">Submit</button>
+  </form>  
+  <div class="video-container">
+    <iframe id="existing-iframe-example" width="50%" height="360" src="https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1" frameborder="0" style="border: solid 4px #37474F"></iframe>
+    <div id="notes-container"></div>
+  </div>
+  <div class="editor-btn-container">
+    <button class="editor-btn" id="edit-notes-btn">Edit Notes</button>
+    <button class="editor-btn" id= "save-notes-btn">Save Notes</button>
+    <button class="editor-btn" id="reset-notes-btn">Reset Notes</button>
+  </div>
+  <div id="quill-container">
+    <div id="quill-div"></div>
+  </div>
+</body>
+
+</html>
