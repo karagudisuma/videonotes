@@ -1,14 +1,27 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
+/*
 // this will be our data base's data structure 
-const DataSchema = new Schema(
+const LoginSchema = new Schema(
   {
     id: Number,
-    message: String
+    username: String,
+    password: String
   },
   { timestamps: true }
-);
+);*/
+
+let VideoDataSchema = new Schema({
+  url: {type: String, required: true},
+  attacherNotes: [
+    {
+      vTime: {type: Number, required: true},
+      quillOps: {type: Array, required: true}
+    }
+  ]
+});
+
 
 // export the new Schema so we could modify it using Node.js
-module.exports = mongoose.model("Data", DataSchema);
+module.exports = mongoose.model("VideoData", VideoDataSchema);
+//module.exports = mongoose.model("LoginData", LoginSchema);

@@ -2,9 +2,12 @@ let notesContainer = null;
 let quillDiv = null;
 let nContainer = null;
 let editor = null;
-let prevSec,
-  prevIndex,
-  masterNotes = "";
+let prevSec = 0,
+  prevIndex = -1,
+  masterNotes = "",
+  player, 
+  current_playtime,
+  tutorialData = "";
 
 function getQuillPad(notesContainer, quillDiv){
   let toolbarOptions = [
@@ -66,10 +69,20 @@ function onPlayerReady(event) {
   document.getElementById("existing-iframe-example").style.borderColor =
     "black";
   current_playtime = player.getCurrentTime();
+  let id = '5c284dc11a9ac882856c63c8';
+  axios.get(`/api/getData/?id=${id}`)
+          .then(res => {
+                  console.log(res);
+                  if(res.data){
+                    tutorialData = res.data.data[0];
+                  }
+                });
+  
 }
 
 function onPlayerStateChange(event) {
   let setNotes;
+  /*
   let tutorialData = {
     ops: [
       { time: 5, insert: "First \n" },
@@ -83,21 +96,23 @@ function onPlayerStateChange(event) {
       { time: 21, insert: "Ninth \n" },
       { time: 23, insert: "Tenth \n" }
     ]
-  };
+  };*/
 
   if (event.data === YT.PlayerState.PLAYING) {
     setNotes = setInterval(function() {
       current_playtime = player.getCurrentTime();
       let sec = Math.ceil(current_playtime.toFixed(2));
-      let index = tutorialData.ops.findIndex((data, index) => {
-        return data.time <= sec && data.time >= prevSec;
-      });
-      if (index > -1 && index > prevIndex) {
-        masterNotes += tutorialData.ops[index].insert;
-        nContainer.setText(masterNotes);
+      if(tutorialData && tutorialData.attacherNotes){
+        let index = tutorialData.attacherNotes.findIndex((data, index) => {
+          return data.vTime <= sec && data.vTime >= prevSec;
+        });
+        if (index > -1 && index > prevIndex) {
+          masterNotes = tutorialData.attacherNotes[index].quillOps;
+          nContainer.setContents(masterNotes);
+          prevIndex = index;
+        }  
       }
       prevSec = sec;
-      prevIndex = index;
     }, 1000);
   } else if (
     event.data === YT.PlayerState.ENDED ||
@@ -117,7 +132,6 @@ tag.id = "iframe-demo";
 tag.src = "https://www.youtube.com/iframe_api";
 let firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-let player, current_playtime;
 
 notesContainer = document.getElementById('notes-container');
 quillDiv = document.getElementById('quill-div');
@@ -129,7 +143,7 @@ document.getElementById("edit-notes-btn").addEventListener("click", () => {
     let qc = document.getElementById("quill-container");
     if (qc.style.display === "none") {
       qc.style.display = "block";
-      editor.setText(masterNotes);
+      editor.setContents(masterNotes);
     } else {
       qc.style.display = "none";
       editor.setText("");
@@ -137,8 +151,19 @@ document.getElementById("edit-notes-btn").addEventListener("click", () => {
   });
   
   document.getElementById("save-notes-btn").addEventListener("click", () => {
-    confirm("Save the notes in the current play time of video?");
+    let result = confirm("Save the notes in the current play time of video?");
+    console.log(editor.getContents().ops);
+    if(result){
+      axios.post("/api/putData", {
+        url: 'https://youtube.com/url-123',
+        attacherNotes: [
+          {
+            vTime: player.getCurrentTime().toFixed(2),
+            quillOps: editor.getContents().ops
+          }
+        ]
+      });
+    }
   });
-  
   
 }, false);
