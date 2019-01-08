@@ -50,7 +50,7 @@ router.get("/getData", (req, res) => {
   console.log(`req: ${JSON.stringify(req.query)}`);
   VideoData.find({ url: req.query.url }, (err, data) => {
     if (err) return res.json({ success: false, error: err });
-    return res.json(data[0]);
+    return res.json(data);
 
   });
 });
@@ -58,14 +58,15 @@ router.get("/getData", (req, res) => {
 // this is our update method
 // this method overwrites existing data in our database
 router.post("/updateData", (req, res) => {
-  const { url, attacherNotes, email, role } = req.body;
+  const { url, attacherNotes, email, role, _id } = req.body;
   let updateData = new VideoData({
     email,
     role,
     url,
     attacherNotes
   });
-  var query = { 'email': email , 'role': role , 'url': url };
+  //var query = { 'email': email , 'role': role , 'url': url };
+  var query = { _id: '_id' };
 console.log(url, updateData);
 
 VideoData.findOneAndUpdate(query, {attacherNotes: attacherNotes}, (err, response) => {

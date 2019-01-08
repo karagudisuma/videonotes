@@ -13,15 +13,17 @@
 
 <body>
   <div>
-    <input type="text" id="video-url-input" placeholder="Add youtube video url here: https://www.youtube.com/watch?v=M7lc1UVf-VE">
+    <label>Video URL </label>
+    <input type="text" id="video-url-input" placeholder="https://www.youtube.com/watch?v=M7lc1UVf-VE">
     <button class="editor-btn" id="url-submit-btn">Submit</button>
   </div>  
+  
   <div class="video-container">
     <div id="player"></div>
     <div id="notes-container"></div>
   </div>
+  <div id="message-div" class="message-alert"></div>
   <div class="editor-btn-container">
-    <button class="editor-btn" id="edit-notes-btn">Edit Notes</button>
     <button class="editor-btn" id= "save-notes-btn">Save Notes</button>
     <button class="editor-btn" id="reset-notes-btn">Reset Notes</button>
   </div>

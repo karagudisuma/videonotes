@@ -21,7 +21,8 @@
 #quill-container{
   border: 2px solid gray;
   height: 300px;
-  display: none; 
+  /*display: none; */
+  display: block;
 }
 
 .editor-btn-container{
@@ -43,4 +44,14 @@
   width: 40%;
   margin: 10px;
   line-height: 1.5rem;
+}
+
+.message-alert{
+  color: green;
+  margin: 10px;
+  padding-left: 20px;
+  font-display: bold;
+  font-size: 1.2em;
+  display: block;
+  height: 2em;
 }

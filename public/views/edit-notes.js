@@ -4,7 +4,7 @@ let nContainer = null,
   editor = null,
   prevSec = 0,
   prevIndex = -1,
-  masterNotes = "",
+  masterNotes = [],
   player,
   tutorialData = "";
 
@@ -50,7 +50,7 @@ function getQuillPad(notesContainer, quillDiv) {
 function onYouTubePlayer() {
   let videoId = getVideoId();
   if (videoId == defaultVideoId) {
-    loadAlert();
+    loadAlert('Default video loaded!');
   }
 
   player = new YT.Player("player", {
@@ -65,9 +65,7 @@ function onYouTubePlayer() {
 }
 
 function onPlayerReady(event) {
-
   document.getElementById("player").style.borderColor = "black";
-
 }
 
 function onPlayerStateChange(event) {
@@ -82,9 +80,14 @@ function onPlayerStateChange(event) {
           return data.vTime <= sec && data.vTime >= prevSec;
         });
         if (index > -1 && index > prevIndex) {
-          masterNotes = tutorialData.attacherNotes[index].quillOps;
+          let quillOps = tutorialData.attacherNotes[index].quillOps;
+          for(let j=0; j<quillOps.length; j++){
+            masterNotes.push(quillOps[j]);
+          }
+          
           nContainer.setContents(masterNotes);
           prevIndex = index;
+          editor.setContents(quillOps);
         }
       }
       prevSec = sec;
@@ -97,12 +100,17 @@ function onPlayerStateChange(event) {
   }
 
   if (event.data === YT.PlayerState.ENDED) {
-    masterNotes = "";
+    masterNotes = [];
+    prevSec = 0;
+    prevIndex = -1;
   }
 }
 
-function loadAlert() {
-  alert('Deafult video loaded!');
+function loadAlert(message) {
+  document.getElementById('message-div').innerHTML = message;
+  setTimeout(() => {
+    document.getElementById('message-div').innerHTML = "";
+  }, 3000);
 }
 
 window.addEventListener(
@@ -125,6 +133,7 @@ window.addEventListener(
 
     getQuillPad(notesContainer, quillDiv);
 
+    /*
     document.getElementById("edit-notes-btn").addEventListener("click", () => {
       let qc = document.getElementById("quill-container");
       if (qc.style.display === "none") {
@@ -134,16 +143,19 @@ window.addEventListener(
         qc.style.display = "none";
         editor.setText("");
       }
-    });
+    });*/
 
-    editor.on("text-change", function (event) {
-      player && player.pauseVideo();
+
+    editor.on("text-change", function (delta, oldDelta, source) {
+      if (source === 'user') {
+        player && player.pauseVideo();
+      }
     });
 
     document.getElementById("save-notes-btn").addEventListener("click", () => {
-      let result = confirm("Save the notes in the current play time of video?");
       let attacherNotes = [], index;
       let notesAddedTime = Math.round(player.getCurrentTime());
+      loadAlert(`Notes is getting saved for ${notesAddedTime} seconds`);
       if (tutorialData && tutorialData.attacherNotes.length > 0) {
         attacherNotes = tutorialData.attacherNotes;
         index = tutorialData.attacherNotes.findIndex(
@@ -163,42 +175,49 @@ window.addEventListener(
       attacherNotes.sort((v1, v2) => v1.vTime - v2.vTime);
       tutorialData.attacherNotes = attacherNotes;
 
-      if (result) {
-        if (tutorialData._id) {
-          axios.post("/api/updateData", {
-            email: 'ksumaudupa@gmail.com',
-            role: 'author',
-            url: getUrl(),
-            attacherNotes
-          });
-        }
-        else {
-          axios.post("/api/putData", {
-            email: 'ksumaudupa@gmail.com',
-            role: 'author',
-            url: getUrl(),
-            attacherNotes
-          });
-        }
 
+      if (tutorialData._id) {
+        axios.post("/api/updateData", {
+          email: 'ksumaudupa@gmail.com',
+          role: 'author',
+          url: getUrl(),
+          _id: tutorialData._id,
+          attacherNotes
+        });
       }
+      else {
+        axios.post("/api/putData", {
+          email: 'ksumaudupa@gmail.com',
+          role: 'author',
+          url: getUrl(),
+          attacherNotes
+        });
+      }
+
+
     });
 
     document.getElementById("url-submit-btn").addEventListener("click", () => {
       let videoId = getVideoId();
       if (videoId == defaultVideoId) {
-        loadAlert();
+        loadAlert('Default video loaded!');
       }
       player.loadVideoById(videoId);
       let url = getUrl();
       if (url) {
         axios.get("/api/getData", { params: { url: url } }).then(res => {
-          if (res.data) {
-            tutorialData = res.data;
+          if (res.data.length > 0) {
+            tutorialData = res.data[0];
           }
         }
         )
       };
+      if (nContainer) {
+        nContainer.setContents("");
+      }
+      if (editor) {
+        editor.setContents("");
+      }
     });
 
     getVideoId = () => {
