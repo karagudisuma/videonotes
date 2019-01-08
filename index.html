@@ -12,12 +12,12 @@
 <link  rel="stylesheet" type="text/css" href="style.css" />
 
 <body>
-  <form>
-    <input type="text" id="input-video-url">
-    <button type="submit">Submit</button>
-  </form>  
+  <div>
+    <input type="text" id="video-url-input" placeholder="Add youtube video url here: https://www.youtube.com/watch?v=M7lc1UVf-VE">
+    <button class="editor-btn" id="url-submit-btn">Submit</button>
+  </div>  
   <div class="video-container">
-    <iframe id="existing-iframe-example" width="50%" height="360" src="https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1" frameborder="0" style="border: solid 4px #37474F"></iframe>
+    <div id="player"></div>
     <div id="notes-container"></div>
   </div>
   <div class="editor-btn-container">

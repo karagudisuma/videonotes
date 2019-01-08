@@ -37,23 +37,42 @@ app.use(express.static(staticPath));
 let hPath = (path.resolve(__dirname + '/../index.html'));
 app.get('/', (req, res) => res.sendFile(hPath));
 
+//Remove cache
+app.get('/*', function (req, res, next) {
+  res.setHeader('Last-Modified', (new Date()).toUTCString());
+  //Goto next route on adding header
+  next();
+});
+
 // this is our get method
 // this method fetches all available data in our database
 router.get("/getData", (req, res) => {
-  VideoData.find((err, data) => {
+  console.log(`req: ${JSON.stringify(req.query)}`);
+  VideoData.find({ url: req.query.url }, (err, data) => {
     if (err) return res.json({ success: false, error: err });
-    return res.json({data});
+    return res.json(data[0]);
+
   });
 });
 
 // this is our update method
 // this method overwrites existing data in our database
 router.post("/updateData", (req, res) => {
-  const { id, update } = req.body;
-  VideoData.findOneAndUpdate(id, update, err => {
-    if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true });
+  const { url, attacherNotes, email, role } = req.body;
+  let updateData = new VideoData({
+    email,
+    role,
+    url,
+    attacherNotes
   });
+  var query = { 'email': email , 'role': role , 'url': url };
+console.log(url, updateData);
+
+VideoData.findOneAndUpdate(query, {attacherNotes: attacherNotes}, (err, response) => {
+  if (err) return res.json({ success: false, error: err });
+  console.log('Data updated');
+  return res.json({ success: true });
+});
 });
 
 // this is our delete method
@@ -69,8 +88,6 @@ router.delete("/deleteData", (req, res) => {
 // this is our create method
 // this method adds new data in our database
 router.post("/putData", (req, res) => {
-  //console.log(`putData:  ${JSON.stringify(req.body)}`);
-  console.log(`VideoSchemaData: ${VideoData}`);
   if (!req.body) {
     return res.json({
       success: false,
@@ -78,17 +95,19 @@ router.post("/putData", (req, res) => {
     });
   }
   let data = new VideoData({
-     url:  req.body.url,
-     attacherNotes: req.body.attacherNotes
+    email: req.body.email,
+    role: req.body.role,
+    url: req.body.url,
+    attacherNotes: req.body.attacherNotes
   })
-  
+
   console.log(`data: ${JSON.stringify(data)}`);
   data.save(err => {
     if (err) {
       console.log("In error");
       return res.json({ success: false, error: err });
-    }   
-    else{
+    }
+    else {
       console.log("Data inserted");
       return res.json({ success: true });
     }
